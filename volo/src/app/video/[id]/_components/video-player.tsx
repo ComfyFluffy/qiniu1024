@@ -149,6 +149,7 @@ export const VideoPlayer = ({
           onClick={handleVideoClick}
           className="h-full w-full rounded-lg object-contain"
           loop={loop}
+          playsInline
         >
           <source src={src} type="video/mp4" />
           Your browser does not support the video tag.
