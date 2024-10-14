@@ -10,7 +10,8 @@ RUN apt update && \
     apt clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN npm install -g pnpm && pnpm install && pnpm build
+RUN npm install -g pnpm@8.8.0 && pnpm install
+RUN pnpm build
 
 RUN chmod +x app.sh
 

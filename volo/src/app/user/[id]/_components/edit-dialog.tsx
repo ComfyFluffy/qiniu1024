@@ -20,12 +20,12 @@ import {
   coverImageToCenter,
   dataURLtoFile,
   readFileInputEventAsDataURL,
+  upload,
 } from "~/app/utils";
 import { type UserDetailedPublic } from "~/types";
 import { Upload } from "@mui/icons-material";
 import { useState } from "react";
 import { api } from "~/trpc/react";
-import { upload } from "qiniu-js";
 import { useRouter } from "next/navigation";
 import { VisuallyHiddenInput } from "~/app/_components/visually-hidden-input";
 
@@ -69,10 +69,10 @@ export function EditDialog({
       setError(undefined);
       let avatarFileKey: string | undefined;
       if (croppedImg) {
-        const { key, token } = await uploadAvatar.mutateAsync();
-        const file = dataURLtoFile(croppedImg, key);
+        const uploadParams = await uploadAvatar.mutateAsync();
+        const file = dataURLtoFile(croppedImg, uploadParams.key);
         await new Promise((resolve, reject) =>
-          upload(file, key, token, {}, {}).subscribe({
+          upload(file, uploadParams, {
             complete: () => {
               resolve(undefined);
             },
@@ -81,7 +81,7 @@ export function EditDialog({
             },
           }),
         );
-        avatarFileKey = key;
+        avatarFileKey = uploadParams.key;
       }
       await updateUser.mutateAsync({ ...userInfo, avatarFileKey });
       onClose();

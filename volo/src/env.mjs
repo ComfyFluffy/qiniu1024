@@ -23,11 +23,6 @@ export const env = createEnv({
       process.env.VERCEL ? z.string() : z.string().url(),
     ),
 
-    // QINIU KODO
-    QINIU_ACCESS_KEY: z.string(),
-    QINIU_SECRET_KEY: z.string(),
-    QINIU_BUCKET: z.string(),
-
     // GORSE
     GORSE_URL: z.string().url(),
 
@@ -37,7 +32,8 @@ export const env = createEnv({
     // elasticsearch
     ES_URL: z.string().url(),
 
-    QINIU_BASE_URL: z.string().url(),
+    ALIYUN_ACCESS_KEY_ID: z.string(),
+    ALIYUN_ACCESS_KEY_SECRET: z.string(),
   },
 
   /**
@@ -45,7 +41,10 @@ export const env = createEnv({
    * isn't built with invalid env vars. To expose them to the client, prefix them with
    * `NEXT_PUBLIC_`.
    */
-  client: {},
+  client: {
+    NEXT_PUBLIC_ALIYUN_OSS_BUCKET: z.string(),
+    NEXT_PUBLIC_ALIYUN_OSS_REGION: z.string(),
+  },
 
   /**
    * You can't destruct `process.env` as a regular object in the Next.js edge runtimes (e.g.
@@ -56,13 +55,13 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-    QINIU_ACCESS_KEY: process.env.QINIU_ACCESS_KEY,
-    QINIU_SECRET_KEY: process.env.QINIU_SECRET_KEY,
-    QINIU_BUCKET: process.env.QINIU_BUCKET,
     GORSE_URL: process.env.GORSE_URL,
     REDIS_URL: process.env.REDIS_URL,
     ES_URL: process.env.ES_URL,
-    QINIU_BASE_URL: process.env.QINIU_BASE_URL,
+    ALIYUN_ACCESS_KEY_ID: process.env.ALIYUN_ACCESS_KEY_ID,
+    ALIYUN_ACCESS_KEY_SECRET: process.env.ALIYUN_ACCESS_KEY_SECRET,
+    NEXT_PUBLIC_ALIYUN_OSS_BUCKET: process.env.NEXT_PUBLIC_ALIYUN_OSS_BUCKET,
+    NEXT_PUBLIC_ALIYUN_OSS_REGION: process.env.NEXT_PUBLIC_ALIYUN_OSS_REGION,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

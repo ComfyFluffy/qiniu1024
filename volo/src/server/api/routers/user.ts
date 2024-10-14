@@ -7,10 +7,11 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { searchUser } from "~/server/lib/search/elasticsearch";
-import { createUploadParameters } from "~/server/lib/util/kodo";
+import { createUploadParameters } from "~/server/lib/util/upload";
 import { type UserPublic } from "~/types";
 import * as es from "~/server/lib/search/elasticsearch";
 import * as gorse from "~/server/lib/gorse/base";
+const ossBaseUrl = `https://${env.NEXT_PUBLIC_ALIYUN_OSS_BUCKET}.${env.NEXT_PUBLIC_ALIYUN_OSS_REGION}.aliyuncs.com`;
 
 export const userRouter = createTRPCRouter({
   currentUser: protectedProcedure.query(
@@ -54,8 +55,7 @@ export const userRouter = createTRPCRouter({
     )
     .mutation(async ({ input: { name, bio, avatarFileKey }, ctx }) => {
       const { userId } = ctx.session;
-      const avatarUrl =
-        avatarFileKey && `${env.QINIU_BASE_URL}/${avatarFileKey}`;
+      const avatarUrl = avatarFileKey && `${ossBaseUrl}/${avatarFileKey}`;
       await ctx.db.user.update({
         where: {
           id: userId,
@@ -105,8 +105,7 @@ export const userRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input: { name, email, password, bio, avatarFileKey }, ctx }) => {
-        const avatarUrl =
-          avatarFileKey && `${env.QINIU_BASE_URL}/${avatarFileKey}`;
+        const avatarUrl = avatarFileKey && `${ossBaseUrl}/${avatarFileKey}`;
         const user = await ctx.db.user.create({
           data: {
             name,

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { api } from "~/trpc/react";
-import { upload } from "qiniu-js";
 import {
   Autocomplete,
   Button,
@@ -28,6 +27,7 @@ import {
   coverImageToCenter,
   dataURLtoFile,
   readFileInputEventAsDataURL,
+  upload,
 } from "../utils";
 import { VisuallyHiddenInput } from "../_components/visually-hidden-input";
 
@@ -70,12 +70,11 @@ export default function UploadPage() {
         return;
       }
 
-      const { key: videoKey, token: videoToken } =
-        await uploadVideoFile.mutateAsync();
+      const uploadParams = await uploadVideoFile.mutateAsync();
       setProgress(0);
-      upload(selectedFile, videoKey, videoToken, {}, {}).subscribe({
-        next: (res) => {
-          setProgress(res.total.percent);
+      upload(selectedFile, uploadParams, {
+        progress: (percent) => {
+          setProgress(percent);
         },
         error: () => {
           setError(true);
@@ -85,7 +84,7 @@ export default function UploadPage() {
           setUploaded(true);
           setVideoInfo((prev) => ({
             ...prev,
-            videoFileKey: videoKey,
+            videoFileKey: uploadParams.key,
           }));
         },
       });
@@ -111,21 +110,22 @@ export default function UploadPage() {
       setCroppedCoverSrc(cropped);
 
       const coverFile = dataURLtoFile(cropped, "cover.jpg");
-      const { key: coverKey, token: coverToken } =
-        await uploadCoverFile.mutateAsync();
+      const uploadParams = await uploadCoverFile.mutateAsync();
       await new Promise((resolve, reject) => {
-        upload(coverFile, coverKey, coverToken, {}, {}).subscribe({
-          error: (error) => {
-            reject(error);
-          },
-          complete: () => {
-            resolve(undefined);
+        upload(coverFile, uploadParams, {
+          error: reject,
+          complete: (coverKey) => {
+            setVideoInfo((prev) => ({
+              ...prev,
+              coverFileKey: coverKey,
+            }));
+            resolve(null);
           },
         });
       });
       setVideoInfo((prev) => ({
         ...prev,
-        coverFileKey: coverKey,
+        coverFileKey: uploadParams.key,
       }));
     } catch {
       setError(true);

@@ -1,3 +1,6 @@
+import { env } from "~/env.mjs";
+import { type UploadParameters } from "~/server/lib/util/upload";
+
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
@@ -112,4 +115,55 @@ export const dataURLtoFile = (dataurl: string, filename: string): File => {
   const blob = new Blob([u8arr], { type: mime });
   // Return a new File object
   return new File([blob], filename, { type: mime });
+};
+
+export const upload = (
+  file: File,
+  { OSSAccessKeyId, policy, Signature, key }: UploadParameters,
+  callbacks: {
+    progress?: (percent: number) => void;
+    error: (err: Error) => void;
+    complete: (videoFileKey: string) => void;
+  },
+) => {
+  // Set initial progress
+  callbacks.progress?.(0);
+
+  // Create FormData object
+  const formData = new FormData();
+  formData.append("key", key);
+  formData.append("OSSAccessKeyId", OSSAccessKeyId);
+  formData.append("policy", policy);
+  formData.append("Signature", Signature);
+  formData.append("file", file);
+
+  // Upload file to OSS using XMLHttpRequest
+  const xhr = new XMLHttpRequest();
+  xhr.open(
+    "POST",
+    `https://${env.NEXT_PUBLIC_ALIYUN_OSS_BUCKET}.${env.NEXT_PUBLIC_ALIYUN_OSS_REGION}.aliyuncs.com`,
+    true,
+  );
+
+  xhr.upload.onprogress = (event) => {
+    if (event.lengthComputable) {
+      const percentComplete = (event.loaded / event.total) * 100;
+      callbacks.progress?.(percentComplete);
+    }
+  };
+
+  xhr.onload = () => {
+    if (xhr.status === 200 || xhr.status === 204) {
+      callbacks.progress?.(100);
+      callbacks.complete(key); // Passing videoFileKey as key
+    } else {
+      callbacks.error(new Error(`Upload failed with status: ${xhr.status}`));
+    }
+  };
+
+  xhr.onerror = () => {
+    callbacks.error(new Error("An error occurred during the file upload."));
+  };
+
+  xhr.send(formData);
 };

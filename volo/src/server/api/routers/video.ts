@@ -8,7 +8,7 @@ import {
 import { getVideos } from "~/server/lib/db/video";
 import * as es from "~/server/lib/search/elasticsearch";
 import * as gorse from "~/server/lib/gorse/base";
-import { createUploadParameters } from "~/server/lib/util/kodo";
+import { createUploadParameters } from "~/server/lib/util/upload";
 import { GorseFeedback, type CommentPublic, type VideoPublic } from "~/types";
 
 export const videoRouter = createTRPCRouter({
@@ -264,8 +264,9 @@ export const videoRouter = createTRPCRouter({
           tags,
         },
       }) => {
-        const coverUrl = `${env.QINIU_BASE_URL}/${coverFileKey}`;
-        const videoUrl = `${env.QINIU_BASE_URL}/${videoFileKey}`;
+        const ossBaseUrl = `https://${env.NEXT_PUBLIC_ALIYUN_OSS_BUCKET}.${env.NEXT_PUBLIC_ALIYUN_OSS_REGION}.aliyuncs.com`;
+        const coverUrl = `${ossBaseUrl}/${coverFileKey}`;
+        const videoUrl = `${ossBaseUrl}/${videoFileKey}`;
         const video = await ctx.db.video.create({
           data: {
             title,
